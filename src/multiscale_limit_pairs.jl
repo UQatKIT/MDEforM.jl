@@ -830,7 +830,7 @@ trajectory = Langevin([-5.0, -5.0], [10.0, 10.0], func_config=(x-> cos(x), x -> 
 fig = produce_trajectory(trajectory)
 ```
 """
-function produce_trajectory(trajectory)
+function produce_trajectory(trajectory::NTuple{2, Array{<:Real, 2}})
 
   # create and adjust figure components
   process_fig = Figure(size=(3840,2160), fontsize = 50)
@@ -851,6 +851,28 @@ function produce_trajectory(trajectory)
       [L"Slow process $X_ϵ$", L"Fast process $Y_ϵ$"],
       labelsize = 80
   )
+
+  process_fig
+end
+
+function produce_trajectory(trajectory::Vector{<:Real}, T::Real)
+
+  N = length(trajectory)
+  T_range = range(0, T, N)
+
+  # create and adjust figure components
+  process_fig = Figure(size=(3840,2160), fontsize = 50)
+  process_ax = Axis(process_fig[1, 1],
+      # x-axis
+      xlabel = L"T",
+      xticks = LinearTicks(5),
+      # y-axis
+      yticks = LinearTicks(10),
+  )
+  Makie.xlims!(process_ax, 0.0, T)
+  colsize!(process_fig.layout, 1, Aspect(1, 1.8))
+  
+  lines!(process_ax, T_range, trajectory, linewidth = 3.0, color = (:pink, 1.0))
 
   process_fig
 end
