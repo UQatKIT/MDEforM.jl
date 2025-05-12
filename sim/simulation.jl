@@ -29,7 +29,7 @@ end
 
 # simulation via multithreading
 
-T_range = range(100, 1000, 10)      # different time horizons of the process
+T_range = range(100, 2000, 20)      # different time horizons of the process
 
 MDE_aver_stdev_values = Array{Float64}(undef, 2, length(T_range))
 
@@ -38,7 +38,7 @@ time_stamp_start = Dates.format(now(), "H:MM:SS")
 
 # Thread-safe parallel loop
 @threads for i in eachindex(1:length(T_range))
-    MDE_aver_stdev_values[:,i] = MDE_single_loop(T_range[i], 10)
+    MDE_aver_stdev_values[:,i] = MDE_single_loop(T_range[i], 1000)
     time_stamp_loop = Dates.format(now(), "H:MM:SS")
     @info "∇ $(time_stamp_loop) - T = $(T_range[i]) complete."
 end
@@ -49,14 +49,17 @@ time_stamp_end = Dates.format(now(), "H:MM:SS")
 @show MDE_aver_stdev_values
 
 # saving output data
-#jldsave("MDE_NLDO_eps01_1D_values.jld2"; MDE_aver_stdev_values = MDE_aver_stdev_values)
+jldsave("MDE_NLDO_eps01_1D_values.jld2"; MDE_aver_stdev_values = MDE_aver_stdev_values)
 
+#=
 # visualization of robustness
 
 # loading required output data
-#MDE_aver_stdev_values = load("MDE_NLDO_eps01_1D_values.jld2")["MDE_aver_stdev_values"])
+MDE_aver_stdev_values = load("MDE_NLDO_eps01_1D_values.jld2")["MDE_aver_stdev_values"]
 
 # visualization of robustness
+
+using CairoMakie
 
 limit_drift_parameter = 2.0*K(NLDO()[3], 1.0)        # true parameter: ϑ=αK(NLDO()[3], σ)
 
@@ -93,3 +96,4 @@ axislegend(robustness_ax,
     [L"True drift parameter $\vartheta_0$", L"MDE estimates $\hat{\vartheta}_T \; (X_\epsilon)$", L"$1$ standard deviation band"]
 )
 robustness_fig
+=#

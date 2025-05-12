@@ -11,4 +11,4 @@
 #SBATCH --mail-user=df2994@kit.edu
 
 export JULIA_NUM_THREADS=40
-julia --project=. simulation.jl
+julia --project=. sim/simulation.jl
