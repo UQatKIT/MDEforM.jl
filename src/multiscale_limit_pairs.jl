@@ -127,7 +127,7 @@ function Fast_OU(X0::Real; func_config, T::Real=100, dt::Real=1e-3)
   
   for k in 1:N
     dW = sqrt(dt)*randn(1)[1]
-    X[k+1] = X[k] + h_aver(X[k])dt + sqrt(σ(X[k])^2)dW
+    X[k+1] = X[k] + h_aver(X[k])dt + sqrt(2σ(X[k])^2)dW
   end
   
   X
@@ -310,8 +310,8 @@ Return corrective constant of the cell problem of the homogenization in the over
 See also [`Langevin`](@ref).
 """
 function K(p::Function, σ::Real)
-  Z1 = HCubature.hquadrature(x -> exp(p(x)/σ), 0, 2pi)[1]
-  Z2 = HCubature.hquadrature(x -> exp(-p(x)/σ), 0, 2pi)[1]
+  Z1 = hquadrature(x -> exp(p(x)/σ), 0, 2pi)[1]
+  Z2 = hquadrature(x -> exp(-p(x)/σ), 0, 2pi)[1]
   
   (2pi)^2/(Z1*Z2)
 end

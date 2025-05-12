@@ -14,7 +14,7 @@ Choosing a centered Gaussian density with covariance matrix ``\beta^2 I_d, \beta
     &- \frac{2}{T} \int_0^T (\mu(\vartheta) \ast k)(X_\epsilon(t)) \, dt + \int_{\R^d} (\mu(\vartheta) \ast k)(x) \mu(\vartheta, x) \, dx,
 \end{aligned}
 ```
-where ``k(x) :=\exp(-\beta^2 |x|_2^2/2)`` is the characteristic function of ``\varphi`` and ``\ast`` denotes the convolution operator on ``\R^d``. Furthermore, if ``\mu(\vartheta)`` is the density of a centered multivariate normal distribution with a positive definite covariance matrix ``M(\vartheta) \in \R^{d \times d}``, then
+where ``k(x) :=\exp(-\beta^2 |x|_2^2/2)`` is the characteristic function of ``\varphi`` and ``\ast`` denotes the convolution operator on ``\R^d.`` Furthermore, if ``\mu(\vartheta)`` is the density of a centered multivariate normal distribution with a positive definite covariance matrix ``M(\vartheta) \in \R^{d \times d}``, then
 ```math
 \begin{aligned}
   \Delta_T(\vartheta, X_\epsilon) &= - \frac{2}{T \sqrt{\det(I_d + \beta^2 M(\vartheta)) }} \int_0^T \exp\left( -\frac{\beta^2}{2} X_\epsilon(t)^\top \left( I_d + \beta^2 M(\vartheta) \right)^{-1} X_\epsilon(t) \right) \, dt \\[0.25cm]

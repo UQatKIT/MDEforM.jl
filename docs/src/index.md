@@ -7,8 +7,9 @@ Project.toml file, start Julia and activate the project in the Terminal via
 ```
 $ julia --project=.
 ```
-Then hit ] and instantiate the packages in the project
+Then hit ] and update and instantiate the packages in the project
 ```julia-repl
+(MDEforM) pkg> update 
 (MDEforM) pkg> instantiate 
 ```
 You may now use the package's functionality

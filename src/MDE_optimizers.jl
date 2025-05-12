@@ -103,18 +103,25 @@ obtained from a multiscale SDE, ``\Delta_T`` is the associated cost functional o
 
 ---
 # Arguments
-- `data::Vector{<:Real}`:    one-dimensional time series ``X_ϵ``.
+- `data::Vector{<:Real}`:       one-dimensional time series ``X_ϵ``.
 - `limit_model::String`:        defining limit model; thus far only supports "Langevin" and "Fast Chaotic Noise".
 - `V::Function`:                potential ``V`` that defines the invariant density of the limit model.
-- `prior_parameter::Real`:   prior estimation parameter; limit diffusion parameter in the "Langevin" case and limit drift parameter in the "Fast Chaotic Noise" case.
-- `ϑ_initial::Real`:         initial point of the numerical optimization procedure.
-- 'verbose::Bool=false':              if `verbose = true`, then detailed information on the optimization will be printed in real-time.
+- `prior_parameter::Real`:      prior estimation parameter; limit diffusion parameter in the "Langevin" case and limit drift parameter in the "Fast Chaotic Noise" case.
+- `ϑ_initial::Real`:            initial point of the numerical optimization procedure.
+- 'verbose::Bool=false':        if `verbose = true`, then detailed information on the optimization will be printed in real-time.
 
 ---
 # Examples
+```julia-repl
+julia> using MDEforM
+julia> data_eps = Langevin(10.0, 5.0, func_config=NLDO(), α=2.0, σ=1.0, ϵ=0.1, T=2500)[1]
+julia> data_limit = Langevin(10.0, func_config=NLDO(), α=2.0, σ=1.0, T=2500)
+julia> V = NLDO()[1]
+julia> limit_diffusion_parameter = 1.0*K(NLDO()[3], 1.0)
+julia> MDE(data_limit[:], "Langevin", V, limit_diffusion_parameter, 10.0)
+julia> MDE(data_eps, "Langevin", V, limit_diffusion_parameter, 10.0)            # true parameter = 2.0*K(NLDO()[3], 1.0) ≈ 1.248
 ```
-$ julia --threads 10 --project=. # start julia with 10 threads and activate project
-```
+
 ```julia-repl
 julia> using MDEforM
 julia> limit_drift_parameter = 1.0

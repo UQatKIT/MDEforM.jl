@@ -10,6 +10,8 @@ using Dates
 using LinearAlgebra
 using NaNMath
 using QuadGK
+using DSP
+using Interpolations
 
 # main code
 export Fast_OU, LDA, NLDAM, NSDP

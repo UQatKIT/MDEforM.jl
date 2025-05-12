@@ -43,7 +43,7 @@ function τ²_QdP(ϑ, Σ)
   f(x) = 2Σ*Φ_prime_QdP(x, ϑ, Σ)^2*μ_QdP(x, ϑ, Σ)
   # functions are symmetric in the considered cases; upper integration limit must be chosen ad-hoc;
   # notice that the integrand decays rapidly to zero
-  2HCubature.hquadrature(f, 0, 20)[1]  
+  2hquadrature(f, 0, 20)[1]  
 end
 
 # Fisher information term
@@ -113,7 +113,7 @@ V(x) = x^4/4-x^2/2
 μ_QrP(x, ϑ, Σ) = μ(x, ϑ, Σ, V)
 
 # convolution term in Fisher information and h
-inner_convolution(x, ϑ, Σ) = HCubature.hquadrature(y -> ∂ϑ_μ(t(y), ϑ, Σ, V)k(x-t(y))[1]dt(y), -1, 1)[1]
+inner_convolution(x, ϑ, Σ) = hquadrature(y -> ∂ϑ_μ(t(y), ϑ, Σ, V)k(x-t(y))[1]dt(y), -1, 1)[1]
   
 # asymptotic variance factor, Dirichlet form corresponding to generator A
 function τ²_QrP(ϑ, Σ)
@@ -121,7 +121,7 @@ function τ²_QrP(ϑ, Σ)
   function h_QrP_const(ϑ, Σ)
     f(y) = inner_convolution(t(y), ϑ, Σ)μ_QrP(t(y), ϑ, Σ)dt(y)
     # function is symmetric
-    2HCubature.hquadrature(f, 0, 1)[1]
+    2hquadrature(f, 0, 1)[1]
   end
 
   # define constant factor to reduce running time; main reason why all these functions are inside τ²_QrP
@@ -148,14 +148,14 @@ function τ²_QrP(ϑ, Σ)
   f(x) = 2Σ*Φ_prime_QrP(x, ϑ, Σ)^2*μ_QrP(x, ϑ, Σ)
   # functions are symmetric in the considered cases; upper integration limit must be chosen ad-hoc;
   # notice that the integrand decays rapidly to zero
-  2HCubature.hquadrature(f, 0, 2)[1]  
+  2hquadrature(f, 0, 2)[1]  
 end
   
 # Fisher information term
 function J_fisher_QrP(ϑ, Σ)
     f(x) = inner_convolution(t(x), ϑ, Σ)∂ϑ_μ(t(x), ϑ, Σ, V)dt(x)
     # functions are symmetric
-    2HCubature.hquadrature(f, 0, 1)[1]
+    2hquadrature(f, 0, 1)[1]
 end
   
 # asymptotic variance

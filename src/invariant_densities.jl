@@ -16,7 +16,7 @@ dt(y) = (1+y^2)/(1-y^2)^2
 
 # invariant density defined through a potential
 @doc raw"""
-    μ(x::Real, ϑ::Real, Σ::Real, V::Function)
+    μ(x::Union{AbstractVector, AbstractRange}, ϑ::Real, Σ::Real, V::Function)
 
 Return function value of invariant density at `x` defined through a potential `V` and given parameter values `ϑ` and `Σ`.
 
@@ -30,26 +30,26 @@ where ``V`` is potential on ``\R``, e.g. ``V(x) = x^4/4 - x^2/2``, and ``Z(ϑ, �
 
 ---
 # Arguments
-- `x::Real`:            argument ``x`` at which to evaluate the function.
-- `ϑ::Real`:            positive drift coefficient ``\vartheta``.
-- `Σ::Real`:            positive diffusion coefficient ``\Sigma``.
-- `V::Function`:        defining potential function ``V``.
+- `x::Union{AbstractVector, AbstractRange}`:    a vector or range of points ``x`` at which to evaluate the function.
+- `ϑ::Real`:                                    positive drift coefficient ``\vartheta``.
+- `Σ::Real`:                                    positive diffusion coefficient ``\Sigma``.
+- `V::Function`:                                defining potential function ``V``.
 
 ---
 # Examples
 ```julia-repl
-julia> lines(range(-5, 5, 1000), map(y -> μ(y, 1, 1, x -> x^2/2), range(-5, 5, 1000)))
+julia> lines(range(-5, 5, 1000), μ(range(-5, 5, 1000), 1, 1, x -> x^2/2))
 ```
 """
-function μ(x::Real, ϑ::Real, Σ::Real, V::Function)
+function μ(x::Union{AbstractVector, AbstractRange}, ϑ::Real, Σ::Real, V::Function)
     # normalization constant
-    Z = HCubature.hquadrature(y -> exp(-ϑ/Σ*V(t(y)))dt(y), -1, 1)[1]
-    1/Z*exp(-ϑ/Σ*V(x))
+    Z = hquadrature(y -> exp(-ϑ/Σ*V(t(y)))dt(y), -1, 1)[1]
+    map(y -> 1/Z*exp(-ϑ/Σ*V(y)), x)
 end
 
 # derivative of invariant density with respect to ϑ
 @doc raw"""
-    ∂ϑ_μ(x::Real, ϑ::Real, Σ::Real, V::Function)
+    ∂ϑ_μ(x::Union{AbstractVector, AbstractRange}, ϑ::Real, Σ::Real, V::Function)
 
 Return function value of derivative of invariant density with respect to drift parameter `ϑ` at `x` for given parameter values `ϑ` and `Σ` and potential `V`.
 
@@ -64,29 +64,29 @@ where ``V`` is a potential on ``\R``, e.g. ``V(x) = x^2/2 - x^4/4``, and ``Z(ϑ,
 
 ---
 # Arguments
-- `x::Real`:            argument ``x`` at which to evaluate the function.
-- `ϑ::Real`:            positive drift coefficient ``\vartheta``.
-- `Σ::Real`:            positive diffusion coefficient ``\Sigma``.
-- `V::Function`:        defining potential function ``V``.
+- `x::Union{AbstractVector, AbstractRange}`:    a vector or range of points ``x`` at which to evaluate the function.
+- `ϑ::Real`:                                    positive drift coefficient ``\vartheta``.
+- `Σ::Real`:                                    positive diffusion coefficient ``\Sigma``.
+- `V::Function`:                                defining potential function ``V``.
 
 ---
 # Examples
 ```julia-repl
-julia> lines(range(-5, 5, 1000), map(x -> ∂ϑ_μ(x, 1, 1, x -> x^2/2), range(-5, 5, 1000)))
+julia> lines(range(-5, 5, 1000), ∂ϑ_μ(range(-5, 5, 1000), 1, 1, x -> x^2/2))
 ```
 """
-function ∂ϑ_μ(x::Real, ϑ::Real, Σ::Real, V::Function)
+function ∂ϑ_μ(x::Union{AbstractVector, AbstractRange}, ϑ::Real, Σ::Real, V::Function)
     # normalization constant
-    Z = HCubature.hquadrature(y -> exp(-ϑ/Σ*V(t(y)))dt(y), -1, 1)[1]
+    Z = hquadrature(y -> exp(-ϑ/Σ*V(t(y)))dt(y), -1, 1)[1]
     # derivative of normalization constant of invariant density with respect to drift parameter
-    ∂ϑ_Z = -1/Σ*HCubature.hquadrature(y -> V(t(y))exp(-ϑ/Σ*V(t(y)))dt(y), -1, 1)[1]
+    ∂ϑ_Z = -1/Σ*hquadrature(y -> V(t(y))exp(-ϑ/Σ*V(t(y)))dt(y), -1, 1)[1]
     # using the normalization constant here again instead of μ(x, ϑ, Σ, V) reduces computational cost
-    -1/Z*exp(-ϑ/Σ*V(x))*(V(x)/Σ + ∂ϑ_Z/Z)
+    map(y -> -1/Z*exp(-ϑ/Σ*V(y))*(V(y)/Σ + ∂ϑ_Z/Z), x)
 end
 
 # derivative of invariant density with respect to Σ
 @doc raw"""
-    ∂Σ_μ(x::Real, ϑ::Real, Σ::Real, V::Function)
+    ∂Σ_μ(x::Union{AbstractVector, AbstractRange}, ϑ::Real, Σ::Real, V::Function)
 
 Return function value of derivative of invariant density with respect to diffusion parameter `Σ` at `x` for given parameter values `ϑ` and `Σ` and potential `V`.
 
@@ -101,22 +101,22 @@ where ``V`` is a potential on ``\R``, e.g. ``V(x) = x^2/2 - x^4/4``, and ``Z(ϑ,
 
 ---
 # Arguments
-- `x::Real`:            argument ``x`` at which to evaluate the function.
-- `ϑ::Real`:            positive drift coefficient ``\vartheta``.
-- `Σ::Real`:            positive diffusion coefficient ``\Sigma``.
-- `V::Function`:        defining potential function ``V``.
+- `x::Union{AbstractVector, AbstractRange}`:    a vector or range of points ``x`` at which to evaluate the function.
+- `ϑ::Real`:                                    positive drift coefficient ``\vartheta``.
+- `Σ::Real`:                                    positive diffusion coefficient ``\Sigma``.
+- `V::Function`:                                defining potential function ``V``.
 
 ---
 # Examples
 ```julia-repl
-julia> lines(range(-5, 5, 1000), map(x -> ∂Σ_μ(x, 1, 1, x -> x^2/2), range(-5, 5, 1000)))
+julia> lines(range(-5, 5, 1000), ∂Σ_μ(range(-5, 5, 1000), 1, 1, x -> x^2/2))
 ```
 """
-function ∂Σ_μ(x::Real, ϑ::Real, Σ::Real, V::Function)
+function ∂Σ_μ(x::Union{AbstractVector, AbstractRange}, ϑ::Real, Σ::Real, V::Function)
     # normalization constant
-    Z = HCubature.hquadrature(y -> exp(-ϑ/Σ*V(t(y)))dt(y), -1, 1)[1]
+    Z = hquadrature(y -> exp(-ϑ/Σ*V(t(y)))dt(y), -1, 1)[1]
     # derivative of normalization constant of invariant density with respect to diffusion parameter
-    ∂Σ_Z = ϑ/Σ^2*HCubature.hquadrature(y -> V(t(y))exp(-ϑ/Σ*V(t(y)))dt(y), -1, 1)[1]
+    ∂Σ_Z = ϑ/Σ^2*hquadrature(y -> V(t(y))exp(-ϑ/Σ*V(t(y)))dt(y), -1, 1)[1]
     # using the normalization constant here again instead of μ(x, ϑ, Σ, V) reduces computational cost
-    1/Z*exp(-ϑ/Σ*V(x))*(ϑ*V(x)/Σ^2 - ∂Σ_Z/Z)
+    map(y -> 1/Z*exp(-ϑ/Σ*V(y))*(ϑ*V(y)/Σ^2 - ∂Σ_Z/Z), x)
 end

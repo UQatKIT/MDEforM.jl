@@ -18,9 +18,9 @@
 
 # characteristic function of gaussian density for estimation, see calculations from main manuscript
 @doc raw"""
-    k(x::Real, β::Real)
+    k(x::Union{AbstractVector, AbstractRange}, β::Real)
 
-Return `β` and function value of the characteristic function of a centered Gaussian density with standard deviation `β` at the point `x` as a tuple.
+Return `β` and function value of the characteristic function of a centered Gaussian density with standard deviation `β` at the vector `x` as a tuple.
 
 This characteristic function is given by
 ```math
@@ -28,28 +28,31 @@ This characteristic function is given by
   k_\beta(x) = \exp\left( -\frac{\beta^2 x^2}{2} \right), \quad x \in \R.
 \end{aligned}
 ```
-It is used in the definition of the MDE and is thoroughly outlined in the main manuscript in the numerics section.
+It is used in the definition of the MDE and is thoroughly outlined in the numerics section of the main manuscript.
 
 ---
 # Arguments
-- `x::Real`:         argument ``x`` at which to evaluate the function.
-- `β::Real`:         positive number ``\beta``.
+- `x::Union{AbstractVector, AbstractRange}`:    a vector or range of points ``x`` at which to evaluate the function.
+- `β::Real=1`:                                  positive number ``\beta``.
 """
-function k(x::Real, β::Real=1)
-  exp(-β^2*x^2/2), β
+function k(x::Union{AbstractVector, AbstractRange}, β::Real=1)
+  exp.(-β^2*x.^2/2), β
 end
+
+###################################### WARNING START ####################################################
+## USING THE FOLLOWING FOUR FUNCTIONS IS COMPUTATIONALLY EXPENSIVE; USE FFT VERSION AFTERWARDS INSTEAD ##
 
 # convolution over which we have to integrate twice; once with respect to the data in a time integral,
 # once over the whole domain of the invariant density, i.e. R, cf. numerics section of main manuscript
 function inner_convol(x, ϑ, Σ, V)
-  HCubature.hquadrature(y -> μ(x-t(y), ϑ, Σ, V)k(t(y))[1]dt(y), -1, 1)[1]
+  hquadrature(y -> μ([x-t(y)], ϑ, Σ, V).*k([t(y)])[1].*dt(y), -1, 1)[1][1]
 end
 
-# space integral in cost functional, integration of inner_convol over R, see above
+# space integral in cost functional
 function convol(ϑ, Σ, V)
-  f(y) = inner_convol(t(y), ϑ, Σ, V)μ(t(y), ϑ, Σ, V)dt(y)
+  f(y) = inner_convol(t(y), ϑ, Σ, V).*μ([t(y)], ϑ, Σ, V).*dt(y)
   # functions are symmetric in the considered cases
-  2HCubature.hquadrature(f, 0, 1)[1]
+  2hquadrature(f, 0, 1)[1]
 end
 
 # time integral in cost functional, integration of inner_convol over data points, see above; serial version;
@@ -79,7 +82,54 @@ function multi_time_integral(data, ϑ, Σ, V)
   sum_atomic[]/N
 end
 
-# complete cost functional, parallel version via multi-threading
+###################################### WARNING END ######################################################
+
+# space integral in cost functional
+function convol_integral(ϑ, Σ, V)
+  inner_convol_term(x) = hquadrature(y -> μ([x-t(y)], ϑ, Σ, V).*k([t(y)])[1].*dt(y), -1, 1)[1]
+  f(y) = inner_convol_term(t(y)).*μ([t(y)], ϑ, Σ, V).*dt(y)
+  # functions are symmetric in the considered cases
+  2hquadrature(f, 0, 1)[1][1]
+end
+
+# computation of convolution terms in time integral of cost functional using fast fourier transform algorithm
+function inner_convol_fft(data, ϑ, Σ, V)
+  δ = 1e-6    # tail cutoff condition
+  dx = 1e-3   # space discretization
+
+  # initial cutoff, calculated according to exp(-ϑ/Σ*x^2) ≤ δ; the highest degree in the potential V is ≥ 2
+  x_cutoff = round((-Σ/ϑ*log(δ))^(1/2)) + 1
+
+  # searching for an approximately stable plateau of μ where it is zero across an interval;
+  # it is important to choose a large cutoff to avoid erroneous artifacts when using FFT
+  for n in 0:100
+      vec = [abs.(μ([x_cutoff+n+2k], ϑ, Σ, V))[1] for k in 0:5]
+      if sum(vec) < length(vec)*δ
+          x_cutoff = x_cutoff+n+2*5
+          break         
+      end
+  end
+
+  # defining space grid for discretization; recall that we deal with symmetric functions here
+  x_range = -x_cutoff:dx:x_cutoff
+
+  # spatial discretization of functions μ and k
+  μ_vec = μ(x_range, ϑ, Σ, V)
+  k_vec = k(x_range)[1]
+
+  # convolution calculation via FFT/conv in DSP package (uses zero-padding internally) and proper spatial scaling
+  conv_res = conv(μ_vec, k_vec).*dx
+
+  # correct x-axis for convolution values due to shifted support of convolution function
+  x_range_conv = dx .* (0:2length(k_vec)-2) .+ 2minimum(x_range)
+
+  # interpolation via Interpolations package
+  itp = interpolate(conv_res, BSpline(Linear()))
+  itp_grid = extrapolate(scale(itp, x_range_conv), 0)  # scaling and extrapolation outside boundary with value zero
+  itp_grid.(data)
+end
+
+# complete cost functional
 @doc raw"""
     Δ(data::Vector{<:Real}, ϑ::Real, Σ::Real, V::Function)
 
@@ -91,19 +141,13 @@ A properly discretized version of the cost functional, given by
   \Delta_T(X_\epsilon, \vartheta, \Sigma, V) = - \frac{2}{T} \int_0^T (\mu(\vartheta, \Sigma, V) \ast k_\beta)(X_\epsilon(t)) \, dt + \int_{\R} (\mu(\vartheta, \Sigma, V) \ast k_\beta)(x) \mu(\vartheta, \Sigma, x) \, dx,
 \end{aligned}
 ```
-is implemented and evaluated via [multithreading](https://docs.julialang.org/en/v1/manual/multi-threading/). Here, ``X_ϵ`` is a one-dimensional time series of length ``T``,
-obtained from a multiscale SDE, ``\mu`` is the invariant density of the homogenized limit SDE, ``k_\beta`` refers to [`k`](@ref), and ``\ast`` is the convolution operator on ``\R``.
+is implemented and evaluated. Here, ``X_ϵ`` is a one-dimensional time series of length ``T``, obtained from a multiscale SDE, 
+``\mu`` is the invariant density of the homogenized limit SDE corresponding to [`μ`](@ref), ``k_\beta`` refers to [`k`](@ref), and ``\ast`` is the convolution operator on ``\R``.
 See the main manuscript for details on this functional. It is the core object of the MDE.
-
-!!! warning 
-    The computational cost of this function is quite high due to the integration of the convolutions, so if the data is finely discretized, then
-    the running times for a single evalutation are relatively long. Remember that, in this case of a 
-    non-quadratic potential, further simplifications of the above formula are not known thus far.
 
 !!! note 
     When comparing the above formula with the formula from the main manuscript, then one notices that the double integral term is missing above. 
     This is on purpose because the double integral does not depend on any parameters with respect to which we will optimize.
-
 
 ---
 # Arguments
@@ -114,11 +158,7 @@ See the main manuscript for details on this functional. It is the core object of
 
 ---
 # Examples
-```
-$ julia --threads 10 --project=. # start julia with 10 threads and activate project
-```
 ```julia-repl
-julia> Threads.nthreads()
 julia> using MDEforM
 julia> data = Langevin(1.0, 0.0, func_config=NLDO(), α=2.0, σ=1.0, ϵ=0.1, T=100)[1]
 julia> Δ(data, 1, 1, NLDO()[1])
@@ -127,7 +167,8 @@ julia> Δ(data, 1, 1, NLDO()[1])
 function Δ(data::Vector{<:Real}, ϑ::Real, Σ::Real, V::Function)
   time_stamp = Dates.format(now(), "HH:MM:SS")
   @info "⊙ $(time_stamp) - Functional call with parameter values ($(round(ϑ, digits=6)), $(round(Σ, digits=6)))."
-  convol(ϑ, Σ, V) + multi_time_integral(data, ϑ, Σ, V)
+
+  -2/length(data)*sum(inner_convol_fft(data, ϑ, Σ, V)) + convol_integral(ϑ, Σ, V)
 end
 
 ## Gaussian case in 1D via exact distance formula ##
