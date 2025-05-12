@@ -35,8 +35,12 @@ It is used in the definition of the MDE and is thoroughly outlined in the numeri
 - `x::Union{AbstractVector, AbstractRange}`:    a vector or range of points ``x`` at which to evaluate the function.
 - `β::Real=1`:                                  positive number ``\beta``.
 """
-function k(x::Union{AbstractVector, AbstractRange}, β::Real=1)
+function k(x::Union{AbstractVector, AbstractRange}, β::Real=1.0)
   exp.(-β^2*x.^2/2), β
+end
+
+function k(x::Real, β::Real=1.0)
+  exp(-β^2*x^2/2), β
 end
 
 ###################################### WARNING START ####################################################
@@ -86,7 +90,7 @@ end
 
 # space integral in cost functional
 function convol_integral(ϑ, Σ, V)
-  inner_convol_term(x) = hquadrature(y -> μ([x-t(y)], ϑ, Σ, V).*k([t(y)])[1].*dt(y), -1, 1)[1]
+  inner_convol_term(x) = hquadrature(y -> μ([x-t(y)], ϑ, Σ, V).*k(t(y))[1].*dt(y), -1, 1)[1]
   f(y) = inner_convol_term(t(y)).*μ([t(y)], ϑ, Σ, V).*dt(y)
   # functions are symmetric in the considered cases
   2hquadrature(f, 0, 1)[1][1]
@@ -214,7 +218,7 @@ function Δ(data::Vector{<:Real}, ϑ::Real, Σ::Real)
   single_integral = 0.0
 
   for i in 1:N
-    single_integral = single_integral + k(data[i]δ1)[1]
+    single_integral += k(data[i]δ1)[1]
   end
   -2δ1/N*single_integral+δ2
 end
