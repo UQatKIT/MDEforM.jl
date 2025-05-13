@@ -9,8 +9,8 @@ $ julia --project=.
 ```
 Then hit ] and update and instantiate the packages in the project
 ```julia-repl
-(MDEforM) pkg> update 
-(MDEforM) pkg> instantiate 
+(MDEforM) pkg> instantiate
+(MDEforM) pkg> update
 ```
 You may now use the package's functionality
 ```julia-repl

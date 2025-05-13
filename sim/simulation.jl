@@ -9,6 +9,8 @@
 ########################################################################################################
 # Jaroslav Borodavka, 09.05.2025
 
+@show Threads.nthreads()
+
 using MDEforM, Dates, Statistics, JLD2
 using Base.Threads # start julia and activate project with desired number of threads in terminal, e.g.: $ julia --threads 10 --project=. 
 
