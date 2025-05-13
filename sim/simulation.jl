@@ -51,9 +51,8 @@ time_stamp_end = Dates.format(now(), "H:MM:SS")
 @show MDE_aver_stdev_values
 
 # saving output data
-jldsave("MDE_NLDO_eps01_1D_values.jld2"; MDE_aver_stdev_values = MDE_aver_stdev_values)
+#jldsave("MDE_NLDO_eps01_1D_values.jld2"; MDE_aver_stdev_values = MDE_aver_stdev_values)
 
-#=
 # visualization of robustness
 
 # loading required output data
@@ -88,9 +87,9 @@ Makie.xlims!(robustness_ax, T_range[begin], T_range[end]), Makie.ylims!(robustne
 colsize!(robustness_fig.layout, 1, Aspect(1, 1.8))
 
 STD_band = band!(robustness_ax, T_range, MDE_aver_values-MDE_stdev_values, MDE_aver_values+MDE_stdev_values,
-                color = (:lightblue, 0.5)
+                color = (:brown, 0.125)
 )
-MDE_line = lines!(robustness_ax, T_range, MDE_aver_values, linewidth = 3.0)
+MDE_line = lines!(robustness_ax, T_range, MDE_aver_values, linewidth = 3.0, color = (:black, 0.8))
 limit_drift_parameter_line = hlines!(robustness_ax, limit_drift_parameter, color = (:red, 0.8), linewidth = 5.0, linestyle = :dash)
 
 axislegend(robustness_ax,
@@ -98,4 +97,4 @@ axislegend(robustness_ax,
     [L"True drift parameter $\vartheta_0$", L"MDE estimates $\hat{\vartheta}_T \; (X_\epsilon)$", L"$1$ standard deviation band"]
 )
 robustness_fig
-=#
+save("fig.pdf", robustness_fig)
