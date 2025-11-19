@@ -1,6 +1,6 @@
 # Home
 
-This is the documentation website for MDEforM.jl (MDE for Multiscale). For detailed theoretical and numerical information on the minimum distance estimation (MDE) method please refer to the accompanying article XXX.
+This is the documentation website for MDEforM.jl (MDE for Multiscale). For detailed theoretical and numerical information on the minimum distance estimation (MDE) method please refer to the accompanying article ["A Minimum Distance Estimator Approach for Misspecified Ergodic Processes"](https://arxiv.org/abs/2506.12432).
 
 In order to use the package, clone the [GitHub repository](https://github.com/UQatKIT/MDEforM) to your local machine, navigate through the Terminal to the root directory containing the
 Project.toml file, start Julia and activate the project in the Terminal via
