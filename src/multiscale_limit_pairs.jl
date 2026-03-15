@@ -862,7 +862,7 @@ function produce_trajectory(trajectory::NTuple{2, Array{<:Real, 2}})
   process_fig
 end
 
-function produce_trajectory(trajectory::Vector{<:Real}, T::Real)
+function produce_trajectory(trajectory::AbstractVector{<:Real}, T::Real)
 
   N = length(trajectory)
   T_range = range(0, T, N)
