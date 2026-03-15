@@ -763,6 +763,13 @@ function Fast_chaotic(X0::Real; A::Real, B::Real, σ::Real, T::Real=100, dt::Rea
   X
 end
 
+## Bilinearly coupled fast-slow SDE system with Ornstein-Uhlenbeck limit ##
+
+# general multiscale system
+function BilinearFastSlow(xy0::Vector{<:Real}; γ::Vector{<:Real}, α::Real, Σ::Real, D::Array{<:Real, 2}, ϵ::Real=0.1, T::Real=100, dt::Real=1e-3)
+  
+end
+
 ## functions for generating a trajectory plot ##
 @doc raw"""
     produce_trajectory(trajectory, T)
