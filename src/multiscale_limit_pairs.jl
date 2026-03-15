@@ -581,7 +581,7 @@ The corresponding stochastic differential equation is defined for ``t \in [0,T]`
 \begin{aligned}
   dX_ϵ(t) &= \left( ν X_ϵ(t) - \frac{1}{2ϵ} (X_ϵ(t)Y_ϵ(t) + Y_ϵ(t)Z_ϵ(t)) \right) dt,                                                 \quad &X_ϵ(0) = x_0,  \\
   dY_ϵ(t) &= \left( ν Y_ϵ(t) - \frac{3}{ϵ^2} Y_ϵ(t) - \frac{1}{2ϵ} (2 X_ϵ(t)Z_ϵ(t) - X_ϵ(t)^2) \right) dt + \frac{q_1}{ϵ} dV_1(t),    \quad &Y_ϵ(0) = y_0,  \\
-  dZ_ϵ(t) &= \left( ν Z_ϵ(t) - \frac{8}{ϵ^2} Y_ϵ(t) - \frac{3}{2ϵ} X_ϵ(t)Y_ϵ(t) \right) dt + \frac{q_2}{ϵ} dV_2(t),                   \quad &Z_ϵ(0) = z_0.
+  dZ_ϵ(t) &= \left( ν Z_ϵ(t) - \frac{8}{ϵ^2} Z_ϵ(t) - \frac{3}{2ϵ} X_ϵ(t)Y_ϵ(t) \right) dt + \frac{q_2}{ϵ} dV_2(t),                   \quad &Z_ϵ(0) = z_0.
 \end{aligned}
 ```
 A simple Euler-Maruyama discretization is implemented for the generation of the time series.
