@@ -12,6 +12,7 @@ using NaNMath
 using QuadGK
 using DSP
 using Interpolations
+using ADTypes: AutoForwardDiff
 
 # main code
 export Fast_OU, LDA, NLDAM, NSDP
