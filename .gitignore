@@ -4,6 +4,8 @@
 
 *.pdf
 
+.vscode/
+
 # data files saved by JLD2
 *.jld2
 
