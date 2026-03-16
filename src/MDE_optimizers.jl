@@ -76,7 +76,7 @@ function MDE(data::Vector{<:Real}, limit_model::String, prior_parameter::Real, �
         
         # optimize with Optim.jl; using forward automatic differentiation for gradient
         optim_res = optimize(ϑ -> J_FCN(first(ϑ)), [lower], [upper], [ϑ_initial], 
-        Fminbox(inner_optimizer), Optim.Options(show_trace = verbose, g_tol=1e-6), autodiff = :forward)
+        Fminbox(inner_optimizer), Optim.Options(show_trace = verbose, g_tol=1e-6), autodiff = AutoForwardDiff())
     end
  
     @show optim_res
@@ -276,7 +276,7 @@ function MDE(data::Array{<:Real, 2}, limit_diffusion::Array{<:Real, 2}, ϑ_initi
     # optimize with Optim.jl, using forward autodiff (forward automatic differentiation)
     println("⎔ GD initial point: ϑ₀ = $(round.(ϑ_initial, digits = 3))")
     optim_res = optimize(J, dfc, vec(ϑ_initial), IPNewton(),
-    Optim.Options(allow_f_increases=true, show_trace=verbose, g_tol=1e-6), autodiff=:forward)
+    Optim.Options(allow_f_increases=true, show_trace=verbose, g_tol=1e-6), autodiff=:AutoForwardDiff())
     @show optim_res
 
     # result as a 2x2 matrix instead of a vector; transpose result of reshape() to get correct matrix
